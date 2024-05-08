@@ -1,14 +1,14 @@
 // Importing required libraries
-import com.sun.javafx.geom.transform.Identity
 import scala.io.{BufferedSource, Source}
-import java.io.{File, FileOutputStream, PrintWriter}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.sql.{Connection, DriverManager, PreparedStatement}
+import java.io.{File, FileOutputStream, PrintWriter}
 import org.apache.logging.log4j.LogManager
 
-
 object CalcDiscount extends App {
+
 
   // Initialize logger
   private val logger = LogManager.getLogger(getClass.getName)
@@ -16,7 +16,12 @@ object CalcDiscount extends App {
   // Log initialization
   logger.info("Rule engine initialization started")
 
-  //*****************************************************************//
+  // The DataBase Connection
+  val url = "jdbc:oracle:thin:@localhost:1521:XE"
+  val username = "HR"
+  val password = "123"
+
+  //********************************************************************************************************************//
 
   // The Reading part
   val source: BufferedSource = Source.fromFile("src/main/resources/TRX1000.csv")
@@ -159,8 +164,9 @@ object CalcDiscount extends App {
     order.copy(discount = discount) // Copy the object to have all values except the one I Changed(Discount)
   }
 
-  // Write headers to the output file
-  val header = "Order Date,Product Name,Expiry Date,Quantity,Unit Price,Channel,Payment Method,Order Before Discount,Discount,Order After Discount"
+////////////////////////////////////////// Write In File ///////////////////////////////////
+// Write headers to the output file
+val header = "Order Date,Product Name,Expiry Date,Quantity,Unit Price,Channel,Payment Method,Order Before Discount,Discount,Order After Discount"
   writer.println(header)
 
   // Write discounted orders to the output file
@@ -175,7 +181,52 @@ object CalcDiscount extends App {
   // Close the output file writer
   writer.close()
 
-//********************************************************************************************//
   // Log completion
   logger.info("Discount calculation completed successfully")
+
+  //**************************************************************// Write In DataBase //*******************************************************//
+
+  var connection: Connection = null     // Declare a variable to hold the database connection
+
+  try {
+    Class.forName("oracle.jdbc.driver.OracleDriver")        // Load the Oracle JDBC driver
+    connection = DriverManager.getConnection(url, username, password)     // Establish a connection to the database using the provided URL, username, and password
+
+    val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+
+    val insertOrderQuery = "INSERT INTO Orders_Discount (Order_Date, Product_Name, Expiry_Date, Quantity, Unit_Price, Channel, Payment_Method, Order_Before_Discount, Discount, Order_After_Discount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    val preparedStatement: PreparedStatement = connection.prepareStatement(insertOrderQuery)     // Create a PreparedStatement to execute the SQL query
+
+
+    // Iterate over each discounted order and insert it into the database
+    discountedOrders.foreach { order =>
+      val orderBeforeDiscount = BigDecimal(order.quantity * order.unit_price).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+      val orderAfterDiscount = BigDecimal(orderBeforeDiscount - (orderBeforeDiscount * order.discount / 100)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
+
+      // Set values for each parameter in the prepared statement
+      preparedStatement.setString(1, order.orderDate.format(dateFormatter))
+      preparedStatement.setString(2, s"${order.productName1}-${order.productName2.mkString(" ")}")
+      preparedStatement.setString(3, order.expiryDate.format(dateFormatter))
+      preparedStatement.setInt(4, order.quantity)
+      preparedStatement.setDouble(5, order.unit_price)
+      preparedStatement.setString(6, order.channel)
+      preparedStatement.setString(7, order.payment_method)
+      preparedStatement.setDouble(8, orderBeforeDiscount)
+      preparedStatement.setString(9, s"${order.discount}%")
+      preparedStatement.setDouble(10, orderAfterDiscount)
+
+      preparedStatement.executeUpdate()     // Execute the SQL INSERT statement
+    }
+
+    println("Orders inserted into database successfully")
+
+  } catch {
+    case e: Exception =>
+      e.printStackTrace()
+      println("An error occurred")    // Print error message
+  } finally {
+    if (connection != null) {
+      connection.close()     // Close the database connection in the finally block to ensure it's always closed
+    }
+  }
 }

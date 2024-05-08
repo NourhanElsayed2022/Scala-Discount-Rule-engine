@@ -4,7 +4,7 @@ This Scala project calculates discounts for orders based on various criteria suc
 
 ## **Project Details:**
 
-This project implements a discount calculation engine in Scala. It reads order data from a CSV file, applies various discount rules, and writes the discounted orders to an output CSV file. The discount rules include expiration date discounts, category-based discounts, special discounts for orders placed on specific dates, quantity-based discounts, app purchase discounts, and payment method discounts.
+This project implements a discount calculation engine in Scala. It reads order data from a CSV file, applies various discount rules, and writes the discounted orders to an output CSV file and a table. The discount rules include expiration date discounts, category-based discounts, special discounts for orders placed on specific dates, quantity-based discounts, app purchase discounts, and payment method discounts.
 
 ## **Discount Calculation:**
 
@@ -51,7 +51,7 @@ For example:
 
 ## **How does It work?**
 
-This Scala project calculates discounts for orders based on various criteria such as expiration date proximity, product category, special dates, quantity, app purchases, and payment method. It reads order data from a CSV file (**`TRX1000.csv`**) , applies the discount rules to each order, and writes the discounted orders to another CSV file. (**`DiscountOutput.csv`**).
+This Scala project calculates discounts for orders based on various criteria such as expiration date proximity, product category, special dates, quantity, app purchases, and payment method. It reads order data from a CSV file (**`TRX1000.csv`**) , applies the discount rules to each order, and writes the discounted orders to another CSV file (**`DiscountOutput.csv`**) and (`Orders_Discount`) table  .
 
  The process is logged, indicating the initialization and completion of the discount calculation.
 
@@ -61,12 +61,14 @@ In the format :       `TIMESTAMP LOGLEVEL MESSAGE`
 
 - **`TRX1000.csv`** Contains sample data to be used on the Rule Engine.
 - **`DiscountOutput.csv`** Contains the output result with discount percentage and the total price after discount.
-- `rules_engine.log` contains the logs of the Rule Engine project.
+- `rules_engine.log` Contains the logs of the Rule Engine project.
+- `Discount_table Creation.sql`    Contains the table creation query.
 
 ## **Tools and Technologies:**
 
 - Scala Programming Language.
 - IntelliJ IDE.
+- Toad.
 
 ## **Dependencies:**
 
@@ -76,6 +78,8 @@ In the format :       `TIMESTAMP LOGLEVEL MESSAGE`
 ```scala
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.14.1"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.14.1"
+
+libraryDependencies += "com.oracle.database.jdbc" % "ojdbc8" % "19.8.0.0"
 ```
 
 ## **How To Use**
@@ -90,6 +94,10 @@ libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.14.1"
 
 ![in.JPG](Scala%20Discounts%20Engine%2074f17010014647368ca78bd6c1618717/in.jpg)
 
-## The Output:
+## The file Output:
 
 ![out.JPG](Scala%20Discounts%20Engine%2074f17010014647368ca78bd6c1618717/out.jpg)
+
+## The database Output:
+
+![out.JPG](Scala%20Discounts%20Engine%2074f17010014647368ca78bd6c1618717/out%201.jpg)

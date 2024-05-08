@@ -1,4 +1,3 @@
-User
 <Configuration status="WARN">
 <Appenders>
 <File name="File" fileName="F:/ITI Material/Scala/Project/DiscountRules/logs/rules_engine.log">

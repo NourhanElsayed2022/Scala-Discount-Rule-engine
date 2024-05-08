@@ -8,3 +8,6 @@ lazy val root = (project in file("."))
   )
 libraryDependencies += "org.apache.logging.log4j" % "log4j-api" % "2.14.1"
 libraryDependencies += "org.apache.logging.log4j" % "log4j-core" % "2.14.1"
+
+
+libraryDependencies += "com.oracle.database.jdbc" % "ojdbc8" % "19.8.0.0"
